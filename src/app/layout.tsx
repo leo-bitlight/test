@@ -25,6 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <header style={{height: '40px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', columnGap: '12px'}}>
+          <a href="/">首页</a>
+          <a href="/sells">出售资产</a>
+          <a href="/orders-update">测试更新订单状态</a>
+        </header>
         {children}
       </body>
     </html>

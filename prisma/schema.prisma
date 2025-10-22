@@ -1,0 +1,34 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+// 数据库模型定义
+model Sell {
+	id           Int      @id @default(autoincrement())
+	assetId      String
+	assetName    String
+	sellPrice    Float
+	sellAmount   Int
+	sellerAddress String
+	timestamp    DateTime @default(now())
+	status       String
+}
+
+model Order {
+	id             Int      @id @default(autoincrement())
+	assetId        String
+	buy_psbt       String
+	buy_sign_psbt  String
+	payment_id     String
+	invoice        String
+	buyer_address  String
+	status         String
+	createdAt      DateTime @default(now())
+	sellId				 Int
+}
