@@ -1,29 +1,23 @@
 "use client";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import BitlightWalletSDK from '@bitlight/wallet-sdk';
+import AccountContext from "@/context/AccountContext";
 
 export default function SellForm() {
+  const {address} = useContext(AccountContext)!;
   const [form, setForm] = useState({
     assetId: "",
     assetName: "",
     sellPrice: "",
     sellAmount: "",
-    sellerAddress: "",
+    sellerAddress: ""
   });
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const connectWallet = async () => {
-    const sdk = new BitlightWalletSDK();
-    const connected = await sdk.isConnected();
-    if (!connected) {
-      await sdk.connect();
-    }
-
-    const address = await sdk.getAddress();
-    console.log('Connected address:', address);
-    setForm({ ...form, sellerAddress: address.address });
-  }
+  useEffect(() => {
+    setForm({ ...form, sellerAddress: address });
+  }, [address])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -79,11 +73,7 @@ export default function SellForm() {
           状态
           <input name="status" placeholder="状态" value={form.status} onChange={handleChange} required />
         </label> */}
-        {
-          form.sellerAddress
-          ? <button type="submit" disabled={loading}>{loading ? "提交中..." : "发布"}</button>
-          : <button type="button" onClick={connectWallet}>Connect</button>
-        }
+        <button type="submit" disabled={loading || !address}>{loading ? "提交中..." : "发布"}</button>
         
         {msg && <div className="form-msg">{msg}</div>}
       </form>

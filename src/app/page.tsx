@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import OrderModal from '../components/OrderModal';
 import BitlightWalletSDK from '@bitlight/wallet-sdk';
+import AccountContext from '@/context/AccountContext';
 
 export default function SellsListPage() {
   const [list, setList] = useState<any[]>([]);
@@ -25,6 +26,7 @@ export default function SellsListPage() {
 function SellsList({ sells }: { sells: any[] }) {
   const [loading, setLoading] = useState(false);
   const [currentSellData, setCurrentSellData] = useState<any>(null);
+  const {address} = useContext(AccountContext)!
 
   const buy = async (item: any) => {
     try {
@@ -97,7 +99,7 @@ function SellsList({ sells }: { sells: any[] }) {
                 </td>
                 <td>{item.status}</td>
                 <td>
-                  <button disabled={loading} type='button' className="order-btn" onClick={() => buy(item)}>Buy</button>
+                  <button disabled={loading || !address} type='button' className="order-btn" onClick={() => buy(item)}>Buy</button>
                 </td>
               </tr>
             ))}

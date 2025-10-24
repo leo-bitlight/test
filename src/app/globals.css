@@ -1,3 +1,22 @@
 * {
   overflow-wrap: anywhere;
 }
+a {
+  text-decoration: none;
+  color: #000;
+}
+
+.header-nav-left {
+  display: flex;
+  column-gap: 12px;
+}
+.t-btn {
+  cursor: pointer;
+  background: linear-gradient(90deg, #0070f3 60%, #3291ff 100%);
+  border: none;
+  border-radius: 6px;
+  padding: .5rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+}
