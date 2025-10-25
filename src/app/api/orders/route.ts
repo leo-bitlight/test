@@ -3,8 +3,21 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
   const data = await req.json();
-  const { sellId, assetId, buy_psbt, buy_sign_psbt, payment_id, invoice, buyer_address, status } = data;
-  
+
+  const {
+    sellId,
+    assetId,
+    assetName,
+    sellPrice,
+    sellAmount,
+    buy_psbt,
+    invoice,
+    buyer_address,
+    sell_address,
+    txid,
+    status,
+  } = data;
+
   console.log(333, data);
 
   try {
@@ -12,16 +25,23 @@ export async function POST(req: NextRequest) {
       data: {
         sellId,
         assetId,
+        assetName,
+        sellPrice,
+        sellAmount,
         buy_psbt,
-        buy_sign_psbt,
-        payment_id,
         invoice,
         buyer_address,
+        sell_address,
+        txid,
         status,
       },
     });
+    await prisma.sell.update({
+      where: { id: sellId },
+      data: { status: '1' },
+    });
     return NextResponse.json(order);
-  } catch(e) {
+  } catch (e) {
     NextResponse.json({});
     console.log(e);
   }

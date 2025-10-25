@@ -14,7 +14,7 @@ model Sell {
 	assetId      String
 	assetName    String
 	sellPrice    Float
-	sellAmount   Int
+	sellAmount   Float
 	sellerAddress String
 	timestamp    DateTime @default(now())
 	status       String
@@ -23,12 +23,19 @@ model Sell {
 model Order {
 	id             Int      @id @default(autoincrement())
 	assetId        String
+	assetName      String
+	sellPrice      Float
+	sellAmount     Float
 	buy_psbt       String
-	buy_sign_psbt  String
-	payment_id     String
+	buy_sign_psbt  String?
+	sell_psbt      String?
+	sell_sign_psbt String?
+	payment_id     String?
 	invoice        String
 	buyer_address  String
+	sell_address   String
 	status         String
+	txid		   String?
 	createdAt      DateTime @default(now())
-	sellId				 Int
+	sellId         Int
 }
