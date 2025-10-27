@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react';
 import OrderModal from '../components/OrderModal';
-import BitlightWalletSDK from '@bitlight/wallet-sdk';
+import BitlightWalletSDK from '../dev/wallet-sdk/src';
 import AccountContext from '@/context/AccountContext';
 const orderStatusMap: { [key: string]: string } = {
   '0': '等待交易',
