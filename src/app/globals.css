@@ -8,7 +8,8 @@ a {
 
 .header-nav-left {
   display: flex;
-  column-gap: 12px;
+  column-gap: 24px;
+  font-weight: 500;
 }
 .t-btn {
   cursor: pointer;

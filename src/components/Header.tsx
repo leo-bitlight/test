@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import BitlightWalletSDK from '@bitlight/wallet-sdk';
 import { formatAddress } from '../app/utils/util';
 import AccountContext from '@/context/AccountContext';
@@ -34,8 +34,8 @@ export default function Header() {
       }}
     >
       <div className='header-nav-left'>
-        <a href='/'>首页</a>
-        <a href='/sells'>出售资产</a>
+        <a href='/'>Home</a>
+        <a href='/sells'>Sell</a>
       </div>
       <div>
         <button type='button' className='t-btn' onClick={connectOrDisWallet}>

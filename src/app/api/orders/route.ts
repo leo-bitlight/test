@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
     sellId,
     assetId,
     assetName,
+    precision,
     sellPrice,
     sellAmount,
     buy_psbt,
@@ -18,14 +19,13 @@ export async function POST(req: NextRequest) {
     status,
   } = data;
 
-  console.log(333, data);
-
   try {
     const order = await prisma.order.create({
       data: {
         sellId,
         assetId,
         assetName,
+        precision: parseInt(precision, 10),
         sellPrice,
         sellAmount,
         buy_psbt,

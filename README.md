@@ -1,3 +1,3 @@
-# Demo
+# About
 
-this project is ai generated
+Demonstration project

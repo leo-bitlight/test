@@ -1,24 +1,24 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-import OrderModal from '../components/OrderModal';
 import BitlightWalletSDK from '../dev/wallet-sdk/src';
 import AccountContext from '@/context/AccountContext';
+
 const orderStatusMap: { [key: string]: string } = {
-  '0': '等待交易',
-  '1': '买家已提交订单，等待卖家交易',
-  '2': '卖家已交易，等待买家签名确认',
-  '3': '买家已签名确认，等待卖家签名确认',
-  '4': '交易成功',
-  '5': '交易失败',
+  '0': 'Waiting for transaction',
+  '1': 'Buyer submitted, waiting for seller to complete the transaction',
+  '2': 'Seller completed the transaction, waiting for the buyer to sign',
+  '3': 'Buyer has signed, waiting for seller to sign',
+  '4': 'Transaction successful',
+  '5': 'Transaction failed',
 };
 const orderStatusOpMap: { [key: string]: string } = {
-  '0': '等待交易',
-  '1': '发送交易',
-  '2': '确认交易',
-  '3': '确认交易',
-  '4': '交易成功',
-  '5': '交易失败',
+  '0': 'Waiting for transaction',
+  '1': 'Send transaction',
+  '2': 'Confirm transaction',
+  '3': 'Confirm transaction',
+  '4': 'Transaction successful',
+  '5': 'Transaction failed',
 };
 
 export default function SellsListPage() {
@@ -26,6 +26,7 @@ export default function SellsListPage() {
   const [list, setList] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [updateTimestamp, setUpdateTimestamp] = useState<number>(Date.now());
+
   useEffect(() => {
     loadList();
   }, [address, updateTimestamp]);
@@ -60,7 +61,7 @@ function SellsList({
   setUpdateTimestamp: (timestamp: number) => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const [currentSellData, setCurrentSellData] = useState<any>(null);
+  // const [currentSellData, setCurrentSellData] = useState<any>(null);
   const { address } = useContext(AccountContext)!;
 
   const buy = async (item: any) => {
@@ -72,13 +73,13 @@ function SellsList({
       }
       const utxo = await sdk.getContractUtxo(item.assetId);
       if (!utxo) {
-        alert('没有可用的UTXO进行支付');
+        alert('No available UTXOs');
         return;
       }
 
       const payjoinData = await sdk.payjoinBuy({
         assets_name: item.assetName,
-        precision: 1,
+        precision: item.precision,
         ticker: item.assetName,
         contract_id: item.assetId,
         receive_rgb_amount: item.sellAmount,
@@ -90,10 +91,8 @@ function SellsList({
 
       console.log('payjoinData', payjoinData);
 
-      //0 等待交易，1买家已提交订单，等待卖家交易,2卖家已交易，等待买家签名确认,3买家已签名确认，等待卖家签名确认,4交易成功，5交易失败
-
       if (!payjoinData || !payjoinData.psbt) {
-        alert('提交订单失败，请重试');
+        alert('Failed to submit order');
         return;
       }
 
@@ -101,6 +100,7 @@ function SellsList({
         sellId: item.id,
         assetId: item.assetId,
         assetName: item.assetName,
+        precision: item.precision,
         sellPrice: item.sellPrice,
         sellAmount: item.sellAmount,
         buy_psbt: payjoinData.psbt,
@@ -109,10 +109,9 @@ function SellsList({
         sell_address: item.sellerAddress,
         status: '1',
       };
-
       console.log(data);
-      setLoading(true);
 
+      setLoading(true);
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -121,7 +120,7 @@ function SellsList({
 
       if (res.ok) {
         setUpdateTimestamp(Date.now());
-        alert('下单成功,请等待卖家处理订单');
+        alert('Order successfully placed, wait for the seller to process the order');
       }
 
       setLoading(false);
@@ -131,16 +130,15 @@ function SellsList({
   };
 
   const handleOrderOp = async (item: any) => {
-    console.log('order op', item);
     const sdk = new BitlightWalletSDK();
     const connected = await sdk.isConnected();
     if (!connected) {
       await sdk.connect();
     }
-    //0 等待交易，1买家已提交订单，等待卖家交易,2卖家已交易，等待买家签名确认,3买家已签名确认，等待卖家签名确认,4交易成功，5交易失败
+   
     setLoading(true);
     if (item.status === '1' && item.sell_address === address) {
-      //卖家发送交易
+      // Seller sends transaction
       const res = await sdk.payjoinSell({
         psbt: item.buy_psbt,
         invoice: item.invoice,
@@ -148,6 +146,7 @@ function SellsList({
         sell_amount_sat: item.sellPrice,
       });
       console.log('payjoinSell', res);
+
       if (res && res.payment_id) {
         await fetch('/api/orders/update-status', {
           method: 'POST',
@@ -160,11 +159,11 @@ function SellsList({
           }),
         });
         setUpdateTimestamp(Date.now());
-        alert('交易已发送，等待买家确认');
+        alert('The transaction has been sent and is awaiting buyer confirmation');
         setLoading(false);
       }
     } else if (item.status === '2' && item.buyer_address === address) {
-      //买家确认交易
+      // Buyer confirms transaction
       const res = await sdk.payjoinBuyConfirm({
         psbt: item.sell_sign_psbt,
         invoice: item.invoice,
@@ -183,11 +182,11 @@ function SellsList({
           }),
         });
         setUpdateTimestamp(Date.now());
-        alert('交易已确认，等待卖家确认');
+        alert('Transaction confirmed, waiting for seller confirmation');
         setLoading(false);
       }
     } else if (item.status === '3' && item.sell_address === address) {
-      //买家确认交易
+      // Buyer confirms transaction
       const res = await sdk.payjoinSellConfirm({
         psbt: item.buy_sign_psbt,
         invoice: item.invoice,
@@ -207,41 +206,41 @@ function SellsList({
           }),
         });
         setUpdateTimestamp(Date.now());
-        alert('交易已确认,等待区块链网络确认');
+        alert('The transaction has been confirmed and is awaiting confirmation from the blockchain network');
         setLoading(false);
       }
     } else {
-      alert('当前状态无法操作');
+      alert('The current state cannot be operated');
       setLoading(false);
     }
   };
 
   return (
     <div className='sells-list-wrapper'>
-      <h2>Sell列表</h2>
+      <h2>Sell List</h2>
       <div className='table-container'>
         <table className='sells-table'>
           <thead>
             <tr>
-              <th>资产ID</th>
-              <th>名称</th>
-              <th>价格</th>
-              <th>数量</th>
-              <th>卖家地址</th>
-              <th>状态</th>
-              <th>操作</th>
+              <th>Asset ID</th>
+              <th>Asset Name</th>
+              <th>Precision</th>
+              <th>Price</th>
+              <th>Amount</th>
+              <th>Seller Address</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {sells.map((item) => (
               <tr key={item.id}>
-                <td>{item.assetId}</td>
+                <td width={220}>{item.assetId}</td>
                 <td>{item.assetName}</td>
+                <td>{item.precision}</td>
                 <td>{item.sellPrice} sat</td>
                 <td>{item.sellAmount}</td>
-                <td>
-                  <div style={{ width: '260px' }}>{item.sellerAddress}</div>
-                </td>
+                <td width={260}> {item.sellerAddress}</td>
                 <td>{orderStatusMap[item.status]}</td>
                 <td>
                   <button
@@ -258,29 +257,31 @@ function SellsList({
           </tbody>
         </table>
       </div>
-      <h2>我的订单</h2>
+
+      <h2 className='my-order'>My Orders</h2>
 
       {address && (
         <div className='table-container'>
           <table className='sells-table'>
             <thead>
               <tr>
-                <th>类型</th>
-                <th>资产ID</th>
-                <th>名称</th>
-                <th>价格</th>
-                <th>数量</th>
-
-                <th>状态</th>
-                <th>操作</th>
+                <th>Type</th>
+                <th>Asset ID</th>
+                <th>Asset Name</th>
+                <th>Precision</th>
+                <th>Price</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((item) => (
                 <tr key={item.id}>
-                  <td>{item.buyer_address === address ? '买入' : '卖出'}</td>
-                  <td>{item.assetId}</td>
+                  <td>{item.buyer_address === address ? 'Buy' : 'Sell'}</td>
+                  <td width={220}>{item.assetId}</td>
                   <td>{item.assetName}</td>
+                  <td>{item.precision}</td>
                   <td>{item.sellPrice} sat</td>
                   <td>{item.sellAmount}</td>
 
@@ -369,6 +370,9 @@ function SellsList({
         .order-btn:disabled {
           background: #999;
           cursor: not-allowed;
+        }
+        .my-order {
+          margin-top: 40px;
         }
       `}</style>
     </div>

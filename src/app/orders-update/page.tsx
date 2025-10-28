@@ -21,29 +21,26 @@ export default function UpdateOrderStatusPage() {
     });
     setLoading(false);
     if (res.ok) {
-      setMsg("更新成功");
+      setMsg("Update successful");
       setForm({ orderId: "", status: "" });
     } else {
-      setMsg("更新失败");
+      setMsg("Update failed");
     }
   };
 
   return (
     <div className="update-order-status-wrapper">
       <form className="update-order-status-form" onSubmit={handleSubmit}>
-        <h2>更新订单状态</h2>
+        <h2>Update Order Status</h2>
         <label>
-          订单ID
-          <input name="orderId" placeholder="订单ID" value={form.orderId} onChange={handleChange} required />
+          Order ID
+          <input name="orderId" value={form.orderId} onChange={handleChange} required />
         </label>
         <label>
-          新状态
-          <input name="status" placeholder="新状态" value={form.status} onChange={handleChange} required />
-          <div>
-            0 等待交易，1已支付等待买家签名,2买家已签名等待支付,3已支付,4已广播，5交易成功，6交易失败
-          </div>
+          New Status
+          <input name="status" value={form.status} onChange={handleChange} required />
         </label>
-        <button type="submit" disabled={loading}>{loading ? "提交中..." : "更新"}</button>
+        <button type="submit" disabled={loading}>{loading ? "Updating" : "Update"}</button>
         {msg && <div className="form-msg">{msg}</div>}
       </form>
       <style jsx>{`

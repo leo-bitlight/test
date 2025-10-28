@@ -1,6 +1,6 @@
 'use client';
+
 import { useContext, useEffect, useState } from 'react';
-import BitlightWalletSDK from '@bitlight/wallet-sdk';
 import AccountContext from '@/context/AccountContext';
 
 export default function SellForm() {
@@ -8,6 +8,7 @@ export default function SellForm() {
   const [form, setForm] = useState({
     assetId: '',
     assetName: '',
+    precision: '',
     sellPrice: '',
     sellAmount: '',
     sellerAddress: '',
@@ -28,9 +29,6 @@ export default function SellForm() {
     setLoading(true);
     setMsg('');
 
-    // console.log(form)
-    // return
-
     const res = await fetch('/api/sells', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -38,79 +36,80 @@ export default function SellForm() {
     });
     setLoading(false);
     if (res.ok) {
-      setMsg('发布成功');
+      setMsg('Successfully published');
       setForm({
         assetId: '',
         assetName: '',
+        precision: '',
         sellPrice: '',
         sellAmount: '',
         sellerAddress: '',
       });
     } else {
-      setMsg('发布失败');
+      setMsg('Failed to publish');
     }
   };
 
   return (
     <div className='sell-form-wrapper'>
       <form className='sell-form' onSubmit={handleSubmit}>
-        <h2>发布资产</h2>
+        <h2>Sell Asset</h2>
         <label>
-          资产ID
+          Asset ID
           <input
             name='assetId'
-            placeholder='资产ID'
             value={form.assetId}
             onChange={handleChange}
             required
           />
         </label>
         <label>
-          资产名称
+          Asset Name
           <input
             name='assetName'
-            placeholder='资产名称'
             value={form.assetName}
             onChange={handleChange}
             required
           />
         </label>
         <label>
-          出售价格(sat)
+          Asset Precision
+          <input
+            name='precision'
+            value={form.precision}
+            onChange={handleChange}
+            required
+          />
+        </label>
+        <label>
+          Sell Price (sats)
           <input
             name='sellPrice'
-            placeholder='出售价格(sat)'
             value={form.sellPrice}
             onChange={handleChange}
             required
           />
         </label>
         <label>
-          出售数量
+          Sell Amount
           <input
             name='sellAmount'
-            placeholder='出售数量'
             value={form.sellAmount}
             onChange={handleChange}
             required
           />
         </label>
         <label>
-          卖家地址
+          Seller Address
           <input
             disabled
             name='sellerAddress'
-            placeholder='卖家地址'
             value={form.sellerAddress}
             required
           />
         </label>
-        {/* <label>
-          状态
-          <input name="status" placeholder="状态" value={form.status} onChange={handleChange} required />
-        </label> */}
         <button type='submit' disabled={loading || !address}>
-          {loading ? '提交中...' : '发布'}
+          {loading ? 'Posting...' : 'Publish'}
         </button>
 
         {msg && <div className='form-msg'>{msg}</div>}
@@ -144,6 +143,7 @@ export default function SellForm() {
           flex-direction: column;
           font-size: 1rem;
           color: #444;
+          font-weight: 500;
         }
         .sell-form input {
           margin-top: 0.3rem;

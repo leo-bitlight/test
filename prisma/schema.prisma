@@ -9,11 +9,11 @@ generator client {
 }
 
 
-// 数据库模型定义
 model Sell {
 	id           Int      @id @default(autoincrement())
 	assetId      String
 	assetName    String
+	precision		 Int      @default(0)
 	sellPrice    Float
 	sellAmount   Float
 	sellerAddress String
@@ -25,6 +25,7 @@ model Order {
 	id             Int      @id @default(autoincrement())
 	assetId        String
 	assetName      String
+	precision			 Int      @default(0)
 	sellPrice      Float
 	sellAmount     Float
 	buy_psbt       String
