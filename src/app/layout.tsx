@@ -2,6 +2,7 @@
 
 import AccountProvider from "@/components/AccountProvider";
 import Header from '../components/Header'
+import Toast from "@/components/Toast";
 
 import "./globals.css";
 
@@ -16,6 +17,7 @@ export default function RootLayout({
         <AccountProvider>
         <Header />
         {children}
+        <Toast />
         </AccountProvider>
       </body>
     </html>

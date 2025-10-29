@@ -2,6 +2,12 @@
 
 import { useContext, useEffect, useState } from 'react';
 import AccountContext from '@/context/AccountContext';
+import SDK from '@bitlight/wallet-sdk'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 export default function SellForm() {
   const { address } = useContext(AccountContext)!;
@@ -14,7 +20,6 @@ export default function SellForm() {
     sellerAddress: '',
   });
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState('');
 
   useEffect(() => {
     setForm({ ...form, sellerAddress: address });
@@ -22,163 +27,107 @@ export default function SellForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  const loadDetail = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const id = e.target.value;
+    if(!id) {
+      return
+    }
+
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+    // try {
+    //   const sdk = new SDK();
+    //   const network = await sdk.getNetwork()
+    //   const data = await fetch('/api/asset', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({
+    //       id: e.target.value,
+    //       network: network,
+    //     }),
+    //   });
+    //   console.log(123, data)
+
+    //   // setForm({ ...form, [e.target.name]: e.target.value });
+    // } catch (error) {
+    //   console.error('Error fetching network:', error);
+    // }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setMsg('');
-
-    const res = await fetch('/api/sells', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    setLoading(false);
-    if (res.ok) {
-      setMsg('Successfully published');
-      setForm({
-        assetId: '',
-        assetName: '',
-        precision: '',
-        sellPrice: '',
-        sellAmount: '',
-        sellerAddress: '',
+    
+    try {
+      setLoading(true);
+      const res = await fetch('/api/sells', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       });
-    } else {
-      setMsg('Failed to publish');
+
+      if (res.ok) {
+        toast.success('Successfully published');
+        setForm({
+          assetId: '',
+          assetName: '',
+          precision: '',
+          sellPrice: '',
+          sellAmount: '',
+          sellerAddress: '',
+        });
+      } else {
+        toast.error('Failed to publish');
+      }
+
+      setLoading(false);
+    } catch(e) {
+      console.log(e)
     }
   };
 
   return (
-    <div className='sell-form-wrapper'>
-      <form className='sell-form' onSubmit={handleSubmit}>
-        <h2>Sell Asset</h2>
-        <label>
-          Asset ID
-          <input
-            name='assetId'
-            value={form.assetId}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Asset Name
-          <input
-            name='assetName'
-            value={form.assetName}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Asset Precision
-          <input
-            name='precision'
-            value={form.precision}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Sell Price (sats)
-          <input
-            name='sellPrice'
-            value={form.sellPrice}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Sell Amount
-          <input
-            name='sellAmount'
-            value={form.sellAmount}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Seller Address
-          <input
-            disabled
-            name='sellerAddress'
-            value={form.sellerAddress}
-            required
-          />
-        </label>
-        <button type='submit' disabled={loading || !address}>
-          {loading ? 'Posting...' : 'Publish'}
-        </button>
+    <div className="max-w-xl p-4 mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle>Sell Asset</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="name">Asset ID</FieldLabel>
+                <Input name="assetId" autoComplete="off" required onChange={loadDetail} />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="name">Asset Name</FieldLabel>
+                <Input value={form.assetName} name="assetName" autoComplete="off" onChange={handleChange} />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="name">Asset Precision</FieldLabel>
+                <Input value={form.precision} name="precision" autoComplete="off" onChange={handleChange} />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="name">Sell Price (sats)</FieldLabel>
+                <Input value={form.sellPrice} name="sellPrice" autoComplete="off" onChange={handleChange} />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="name">Sell Amount</FieldLabel>
+                <Input value={form.sellAmount} name="sellAmount" autoComplete="off" onChange={handleChange} />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="name">Seller Address</FieldLabel>
+                <Input disabled value={form.sellerAddress} name="sellerAddress" autoComplete="off"  />
+              </Field>
 
-        {msg && <div className='form-msg'>{msg}</div>}
-      </form>
-      <style jsx>{`
-        .sell-form-wrapper {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #f7f8fa;
-        }
-        .sell-form {
-          background: #fff;
-          border-radius: 12px;
-          box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
-          padding: 2.5rem 2rem 2rem 2rem;
-          max-width: 400px;
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          gap: 1.2rem;
-        }
-        .sell-form h2 {
-          text-align: center;
-          margin-bottom: 0.5rem;
-          color: #222;
-        }
-        .sell-form label {
-          display: flex;
-          flex-direction: column;
-          font-size: 1rem;
-          color: #444;
-          font-weight: 500;
-        }
-        .sell-form input {
-          margin-top: 0.3rem;
-          padding: 0.6rem 0.8rem;
-          border: 1px solid #e0e0e0;
-          border-radius: 6px;
-          font-size: 1rem;
-          background: #fafbfc;
-          outline: none;
-        }
-        .sell-form input:hover {
-          border: 1px solid #0070f3;
-        }
-        .sell-form button {
-          margin-top: 0.5rem;
-          padding: 0.7rem 0;
-          background: linear-gradient(90deg, #0070f3 60%, #3291ff 100%);
-          color: #fff;
-          border: none;
-          border-radius: 6px;
-          font-size: 1.1rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-        .sell-form button:disabled {
-          background: #b2cdfa;
-          cursor: not-allowed;
-        }
-        .form-msg {
-          text-align: center;
-          color: #0070f3;
-          margin-top: 0.5rem;
-        }
-      `}</style>
+              <Field orientation="horizontal">
+                <Button disabled={loading || !address} type="submit" className='w-full'>Submit</Button>
+              </Field>
+            </FieldGroup>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

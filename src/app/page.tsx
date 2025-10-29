@@ -3,6 +3,9 @@
 import { useContext, useEffect, useState } from 'react';
 import BitlightWalletSDK from '../dev/wallet-sdk/src';
 import AccountContext from '@/context/AccountContext';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const orderStatusMap: { [key: string]: string } = {
   '0': 'Waiting for transaction',
@@ -73,7 +76,7 @@ function SellsList({
       }
       const utxo = await sdk.getContractUtxo(item.assetId);
       if (!utxo) {
-        alert('No available UTXOs');
+        toast.error('No available UTXOs');
         return;
       }
 
@@ -92,7 +95,7 @@ function SellsList({
       console.log('payjoinData', payjoinData);
 
       if (!payjoinData || !payjoinData.psbt) {
-        alert('Failed to submit order');
+        toast.error('Failed to submit order');
         return;
       }
 
@@ -120,7 +123,7 @@ function SellsList({
 
       if (res.ok) {
         setUpdateTimestamp(Date.now());
-        alert('Order successfully placed, wait for the seller to process the order');
+        toast.error('Order successfully placed, wait for the seller to process the order');
       }
 
       setLoading(false);
@@ -135,11 +138,13 @@ function SellsList({
     if (!connected) {
       await sdk.connect();
     }
-   
+
     setLoading(true);
     if (item.status === '1' && item.sell_address === address) {
       // Seller sends transaction
       const res = await sdk.payjoinSell({
+        // @ts-expect-error add field
+        precision: item.precision,
         psbt: item.buy_psbt,
         invoice: item.invoice,
         state: item.sellId,
@@ -159,12 +164,14 @@ function SellsList({
           }),
         });
         setUpdateTimestamp(Date.now());
-        alert('The transaction has been sent and is awaiting buyer confirmation');
+        toast.error('The transaction has been sent and is awaiting buyer confirmation');
         setLoading(false);
       }
     } else if (item.status === '2' && item.buyer_address === address) {
       // Buyer confirms transaction
       const res = await sdk.payjoinBuyConfirm({
+        // @ts-expect-error add field
+        precision: item.precision,
         psbt: item.sell_sign_psbt,
         invoice: item.invoice,
         sell_amount_sat: item.sellPrice,
@@ -182,12 +189,14 @@ function SellsList({
           }),
         });
         setUpdateTimestamp(Date.now());
-        alert('Transaction confirmed, waiting for seller confirmation');
+        toast.error('Transaction confirmed, waiting for seller confirmation');
         setLoading(false);
       }
     } else if (item.status === '3' && item.sell_address === address) {
       // Buyer confirms transaction
       const res = await sdk.payjoinSellConfirm({
+        // @ts-expect-error add field
+        precision: item.precision,
         psbt: item.buy_sign_psbt,
         invoice: item.invoice,
         sell_amount_sat: item.sellPrice,
@@ -206,88 +215,97 @@ function SellsList({
           }),
         });
         setUpdateTimestamp(Date.now());
-        alert('The transaction has been confirmed and is awaiting confirmation from the blockchain network');
+        toast.error('The transaction has been confirmed and is awaiting confirmation from the blockchain network');
         setLoading(false);
       }
     } else {
-      alert('The current state cannot be operated');
+      toast.error('The current state cannot be operated');
       setLoading(false);
     }
   };
 
   return (
-    <div className='sells-list-wrapper'>
-      <h2>Sell List</h2>
-      <div className='table-container'>
-        <table className='sells-table'>
-          <thead>
-            <tr>
-              <th>Asset ID</th>
-              <th>Asset Name</th>
-              <th>Precision</th>
-              <th>Price</th>
-              <th>Amount</th>
-              <th>Seller Address</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
+    <div className='mx-20'>
+      <h2 className='pt-10 pb-2 font-bold'>Sell List</h2>
+      <div className='border rounded'>
+        <Table className='sells-table'>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Asset ID</TableHead>
+              <TableHead>Asset Name</TableHead>
+              <TableHead>Precision</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Seller Address</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {sells.map((item) => (
-              <tr key={item.id}>
-                <td width={220}>{item.assetId}</td>
-                <td>{item.assetName}</td>
-                <td>{item.precision}</td>
-                <td>{item.sellPrice} sat</td>
-                <td>{item.sellAmount}</td>
-                <td width={260}> {item.sellerAddress}</td>
-                <td>{orderStatusMap[item.status]}</td>
-                <td>
-                  <button
+              <TableRow key={item.id}>
+                <TableCell>
+                  <div className='max-w-[220px]'>{item.assetId}</div>
+                </TableCell>
+                <TableCell>{item.assetName}</TableCell>
+                <TableCell>{item.precision}</TableCell>
+                <TableCell>{item.sellPrice} sat</TableCell>
+                <TableCell>{item.sellAmount}</TableCell>
+                <TableCell>
+                  <div className='max-w-[220px]'>
+                    {item.sellerAddress}
+                  </div>
+                </TableCell>
+                <TableCell>{orderStatusMap[item.status]}</TableCell>
+                <TableCell>
+                  <Button
                     disabled={loading || !address || item.status !== '0'}
                     type='button'
-                    className='order-btn'
                     onClick={() => buy(item)}
                   >
                     Buy
-                  </button>
-                </td>
-              </tr>
+                  </Button>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
-      <h2 className='my-order'>My Orders</h2>
+      <h2 className='pt-10 pb-2 font-bold'>My Orders</h2>
 
       {address && (
-        <div className='table-container'>
-          <table className='sells-table'>
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Asset ID</th>
-                <th>Asset Name</th>
-                <th>Precision</th>
-                <th>Price</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
+        <div className='border rounded'>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Type</TableHead>
+                <TableHead>Asset ID</TableHead>
+                <TableHead>Asset Name</TableHead>
+                <TableHead>Precision</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {orders.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.buyer_address === address ? 'Buy' : 'Sell'}</td>
-                  <td width={220}>{item.assetId}</td>
-                  <td>{item.assetName}</td>
-                  <td>{item.precision}</td>
-                  <td>{item.sellPrice} sat</td>
-                  <td>{item.sellAmount}</td>
+                <TableRow key={item.id}>
+                  <TableCell>{item.buyer_address === address ? 'Buy' : 'Sell'}</TableCell>
+                  <TableCell>
+                    <div className='max-w-[220px]'>
+                      {item.assetId}
+                    </div>
+                  </TableCell>
+                  <TableCell>{item.assetName}</TableCell>
+                  <TableCell>{item.precision}</TableCell>
+                  <TableCell>{item.sellPrice} sat</TableCell>
+                  <TableCell>{item.sellAmount}</TableCell>
 
-                  <td>{orderStatusMap[item.status]}</td>
-                  <td>
-                    <button
+                  <TableCell>{orderStatusMap[item.status]}</TableCell>
+                  <TableCell>
+                    <Button
                       disabled={
                         loading ||
                         !address ||
@@ -298,83 +316,17 @@ function SellsList({
                           item.status !== '3')
                       }
                       type='button'
-                      className='order-btn'
                       onClick={() => handleOrderOp(item)}
                     >
                       {orderStatusOpMap[item.status]}
-                    </button>
-                  </td>
-                </tr>
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
-
-      <style jsx>{`
-        .sells-list-wrapper {
-          min-width: 1000px;
-          margin: 2.5rem auto;
-          background: #fff;
-          border-radius: 12px;
-          box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
-          padding: 2rem 1.5rem 2.5rem 1.5rem;
-        }
-        .sells-list-wrapper h2 {
-          text-align: center;
-          color: #222;
-          margin-bottom: 1.5rem;
-        }
-        .table-container {
-          overflow-x: auto;
-        }
-        .sells-table {
-          width: 100%;
-          border-collapse: collapse;
-          background: #fafbfc;
-          border-radius: 8px;
-          overflow: hidden;
-          font-size: 1rem;
-        }
-        .sells-table th,
-        .sells-table td {
-          padding: 0.9rem 0.7rem;
-          text-align: center;
-        }
-        .sells-table th {
-          background: #f0f4fa;
-          color: #0070f3;
-          font-weight: 600;
-          border-bottom: 2px solid #e0e7ef;
-        }
-        .sells-table tr {
-          transition: background 0.2s;
-        }
-        .sells-table tbody tr:hover {
-          background: #eaf4ff;
-        }
-        .sells-table td {
-          border-bottom: 1px solid #e0e7ef;
-        }
-        .order-btn {
-          padding: 0.5rem 1.1rem;
-          background: linear-gradient(90deg, #0070f3 60%, #3291ff 100%);
-          color: #fff;
-          border: none;
-          border-radius: 6px;
-          font-size: 1rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-        .order-btn:disabled {
-          background: #999;
-          cursor: not-allowed;
-        }
-        .my-order {
-          margin-top: 40px;
-        }
-      `}</style>
     </div>
   );
 }

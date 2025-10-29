@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import BitlightWalletSDK from '@bitlight/wallet-sdk';
 import { formatAddress } from '../app/utils/util';
 import AccountContext from '@/context/AccountContext';
+import { Button } from './ui/button';
 
 export default function Header() {
   const { address, setAddress } = useContext(AccountContext)!;
@@ -25,22 +26,15 @@ export default function Header() {
   };
 
   return (
-    <header
-      style={{
-        height: '40px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}
-    >
-      <div className='header-nav-left'>
+    <header className='sticky top-0 bg-background shadow h-12 flex items-center justify-between px-4'>
+      <div className='flex gap-x-4'>
         <a href='/'>Home</a>
         <a href='/sells'>Sell</a>
       </div>
       <div>
-        <button type='button' className='t-btn' onClick={connectOrDisWallet}>
+        <Button type='button' onClick={connectOrDisWallet}>
           {address ? formatAddress(address) : 'Connect Wallet'}
-        </button>
+        </Button>
       </div>
     </header>
   );
