@@ -11,8 +11,8 @@ export default function Header() {
     const sdk = new BitlightWalletSDK();
 
     if (address) {
-      await sdk.disconnect();
       setAddress('');
+      await sdk.disconnect();
       return;
     }
 

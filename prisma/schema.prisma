@@ -11,6 +11,7 @@ generator client {
 
 model Sell {
 	id           Int      @id @default(autoincrement())
+	network		   String   @default("")
 	assetId      String
 	assetName    String
 	precision		 Int      @default(0)
@@ -23,6 +24,7 @@ model Sell {
 
 model Order {
 	id             Int      @id @default(autoincrement())
+	network 			 String   @default("")
 	assetId        String
 	assetName      String
 	precision			 Int      @default(0)

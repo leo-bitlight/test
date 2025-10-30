@@ -74,6 +74,14 @@ function SellsList({
       if (!connected) {
         await sdk.connect();
       }
+
+      const network = await sdk.getNetwork();
+      if(network !== item.network) {
+        toast.error('Network mismatch');
+        return
+      }
+
+      
       const utxo = await sdk.getContractUtxo(item.assetId);
       if (!utxo) {
         toast.error('No available UTXOs');
@@ -100,6 +108,7 @@ function SellsList({
       }
 
       const data = {
+        network: item.network,
         sellId: item.id,
         assetId: item.assetId,
         assetName: item.assetName,
@@ -231,6 +240,7 @@ function SellsList({
         <Table className='sells-table'>
           <TableHeader>
             <TableRow>
+              <TableHead>Network</TableHead>
               <TableHead>Asset ID</TableHead>
               <TableHead>Asset Name</TableHead>
               <TableHead>Precision</TableHead>
@@ -244,6 +254,7 @@ function SellsList({
           <TableBody>
             {sells.map((item) => (
               <TableRow key={item.id}>
+                <TableCell>{item.network}</TableCell>
                 <TableCell>
                   <div className='max-w-[220px]'>{item.assetId}</div>
                 </TableCell>
@@ -280,6 +291,7 @@ function SellsList({
             <TableHeader>
               <TableRow>
                 <TableHead>Type</TableHead>
+                <TableHead>Network</TableHead>
                 <TableHead>Asset ID</TableHead>
                 <TableHead>Asset Name</TableHead>
                 <TableHead>Precision</TableHead>
@@ -293,6 +305,7 @@ function SellsList({
               {orders.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>{item.buyer_address === address ? 'Buy' : 'Sell'}</TableCell>
+                  <TableCell>{item.network}</TableCell>
                   <TableCell>
                     <div className='max-w-[220px]'>
                       {item.assetId}

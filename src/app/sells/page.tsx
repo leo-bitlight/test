@@ -70,10 +70,23 @@ export default function SellForm() {
     
     try {
       setLoading(true);
+      const network = await new SDK().getNetwork();
+
+      if(!network) {
+        toast.error('Get network failed');
+        setLoading(false);
+        return;
+      }
+
+      const data = {
+        ...form,
+        network
+      }
+
       const res = await fetch('/api/sells', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(data),
       });
 
       if (res.ok) {

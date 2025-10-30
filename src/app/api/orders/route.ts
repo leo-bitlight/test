@@ -5,6 +5,7 @@ export async function POST(req: NextRequest) {
   const data = await req.json();
 
   const {
+    network,
     sellId,
     assetId,
     assetName,
@@ -22,6 +23,7 @@ export async function POST(req: NextRequest) {
   try {
     const order = await prisma.order.create({
       data: {
+        network,
         sellId,
         assetId,
         assetName,
