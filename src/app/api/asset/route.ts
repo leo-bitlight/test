@@ -18,13 +18,14 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         key: id,
         network,
-        page:1,
+        page: 1,
+        per_page: 20
       }),
     });
-    const json = await res.json();
-    return NextResponse.json(json);
-  } catch (error) {
-    console.log(error)
-    return NextResponse.json({ error: 'Failed to fetch asset data' }, { status: 500 });
+    return new Response(res.body, {
+      status: res.status,
+    });
+  } catch (e) {
+    return new Response((e as Error).message, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-import BitlightWalletSDK from '../dev/wallet-sdk/src';
+import BitlightWalletSDK from '@bitlight/wallet-sdk';
 import AccountContext from '@/context/AccountContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';

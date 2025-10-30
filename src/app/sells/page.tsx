@@ -37,23 +37,32 @@ export default function SellForm() {
 
     setForm({ ...form, [e.target.name]: e.target.value });
 
-    // try {
-    //   const sdk = new SDK();
-    //   const network = await sdk.getNetwork()
-    //   const data = await fetch('/api/asset', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({
-    //       id: e.target.value,
-    //       network: network,
-    //     }),
-    //   });
-    //   console.log(123, data)
+    try {
+      const sdk = new SDK();
+      const network = await sdk.getNetwork()
+      const res = await fetch('/api/asset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: e.target.value,
+          network: network,
+        }),
+      });
+      const json = await res.json()
+      const info = json.assets.length > 0 ? json.assets[0] : null;
+      if(!info) {
+        toast.error('Asset not found');
+        return
+      }
 
-    //   // setForm({ ...form, [e.target.name]: e.target.value });
-    // } catch (error) {
-    //   console.error('Error fetching network:', error);
-    // }
+      setForm({
+        ...form,
+        assetName: info.name,
+        precision: info.precision,
+      });
+    } catch (error) {
+      console.error('Error fetching network:', error);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
