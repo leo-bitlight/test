@@ -44,11 +44,11 @@ export default function UpdateOrderStatusPage() {
           <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="name">Order ID</FieldLabel>
+                <FieldLabel htmlFor="orderId">Order ID</FieldLabel>
                 <Input value={form.orderId} name="orderId" autoComplete="off" required onChange={handleChange} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="name">New Status</FieldLabel>
+                <FieldLabel htmlFor="status">New Status</FieldLabel>
                 <Input value={form.status} name="status" autoComplete="off" required onChange={handleChange} />
               </Field>
               <Field orientation="horizontal">

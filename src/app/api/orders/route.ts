@@ -44,7 +44,6 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json(order);
   } catch (e) {
-    NextResponse.json({});
-    console.log(e);
+    NextResponse.json({error: (e as Error).message});
   }
 }

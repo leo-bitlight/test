@@ -11,7 +11,7 @@ const orderStatusMap: { [key: string]: string } = {
   '0': 'Waiting for transaction',
   '1': 'Buyer submitted, waiting for seller to complete the transaction',
   '2': 'Seller completed the transaction, waiting for the buyer to sign',
-  '3': 'Buyer has signed, waiting for seller to sign',
+  '3': 'Buyer signed, waiting for seller to sign',
   '4': 'Transaction successful',
   '5': 'Transaction failed',
 };
@@ -65,7 +65,7 @@ function SellsList({
 }) {
   const [loading, setLoading] = useState(false);
   // const [currentSellData, setCurrentSellData] = useState<any>(null);
-  const { address } = useContext(AccountContext)!;
+  const { address, setAddress } = useContext(AccountContext)!;
 
   const buy = async (item: any) => {
     try {
@@ -78,10 +78,12 @@ function SellsList({
       const network = await sdk.getNetwork();
       if(network !== item.network) {
         toast.error('Network mismatch');
+        setAddress('');
+        sdk.disconnect();
         return
       }
 
-      
+      // Find asset utxo or an available btc utxo
       const utxo = await sdk.getContractUtxo(item.assetId);
       if (!utxo) {
         toast.error('No available UTXOs');
@@ -90,10 +92,10 @@ function SellsList({
 
       const payjoinData = await sdk.payjoinBuy({
         assets_name: item.assetName,
-        precision: item.precision,
         ticker: item.assetName,
         contract_id: item.assetId,
-        receive_rgb_amount: item.sellAmount,
+        precision: item.precision,
+        receive_rgb_amount: (item.sellAmount / Math.pow(10, item.precision)).toString(),
         sell_btc_address: item.sellerAddress,
         sell_amount_sat: item.sellPrice,
         utxo,
@@ -132,7 +134,7 @@ function SellsList({
 
       if (res.ok) {
         setUpdateTimestamp(Date.now());
-        toast.error('Order successfully placed, wait for the seller to process the order');
+        toast.success('Order successfully placed, wait for the seller to process the order');
       }
 
       setLoading(false);
@@ -152,8 +154,6 @@ function SellsList({
     if (item.status === '1' && item.sell_address === address) {
       // Seller sends transaction
       const res = await sdk.payjoinSell({
-        // @ts-expect-error add field
-        precision: item.precision,
         psbt: item.buy_psbt,
         invoice: item.invoice,
         state: item.sellId,
@@ -173,14 +173,12 @@ function SellsList({
           }),
         });
         setUpdateTimestamp(Date.now());
-        toast.error('The transaction has been sent and is awaiting buyer confirmation');
+        toast.success('The transaction has been sent and is awaiting buyer confirmation');
         setLoading(false);
       }
     } else if (item.status === '2' && item.buyer_address === address) {
       // Buyer confirms transaction
       const res = await sdk.payjoinBuyConfirm({
-        // @ts-expect-error add field
-        precision: item.precision,
         psbt: item.sell_sign_psbt,
         invoice: item.invoice,
         sell_amount_sat: item.sellPrice,
@@ -198,14 +196,12 @@ function SellsList({
           }),
         });
         setUpdateTimestamp(Date.now());
-        toast.error('Transaction confirmed, waiting for seller confirmation');
+        toast.success('Transaction confirmed, waiting for seller confirmation');
         setLoading(false);
       }
     } else if (item.status === '3' && item.sell_address === address) {
       // Buyer confirms transaction
       const res = await sdk.payjoinSellConfirm({
-        // @ts-expect-error add field
-        precision: item.precision,
         psbt: item.buy_sign_psbt,
         invoice: item.invoice,
         sell_amount_sat: item.sellPrice,
@@ -213,6 +209,7 @@ function SellsList({
         state: item.sellId,
       });
       console.log('payjoinSellConfirm', res);
+
       if (res && res.paid) {
         await fetch('/api/orders/update-status', {
           method: 'POST',
@@ -224,7 +221,7 @@ function SellsList({
           }),
         });
         setUpdateTimestamp(Date.now());
-        toast.error('The transaction has been confirmed and is awaiting confirmation from the blockchain network');
+        toast.success('The transaction has been confirmed and is awaiting confirmation from the blockchain network');
         setLoading(false);
       }
     } else {
@@ -261,7 +258,7 @@ function SellsList({
                 <TableCell>{item.assetName}</TableCell>
                 <TableCell>{item.precision}</TableCell>
                 <TableCell>{item.sellPrice} sat</TableCell>
-                <TableCell>{item.sellAmount}</TableCell>
+                <TableCell>{item.sellAmount / Math.pow(10, item.precision)}</TableCell>
                 <TableCell>
                   <div className='max-w-[220px]'>
                     {item.sellerAddress}
@@ -314,7 +311,7 @@ function SellsList({
                   <TableCell>{item.assetName}</TableCell>
                   <TableCell>{item.precision}</TableCell>
                   <TableCell>{item.sellPrice} sat</TableCell>
-                  <TableCell>{item.sellAmount}</TableCell>
+                  <TableCell>{item.sellAmount / Math.pow(10, item.precision)}</TableCell>
 
                   <TableCell>{orderStatusMap[item.status]}</TableCell>
                   <TableCell>

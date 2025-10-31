@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react';
 import AccountContext from '@/context/AccountContext';
-import SDK from '@bitlight/wallet-sdk'
+import SDK from '@bitlight/wallet-sdk';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,7 @@ export default function SellForm() {
 
     setForm({ ...form, [e.target.name]: e.target.value });
 
+    // Fetch asset info
     // try {
     //   const sdk = new SDK();
     //   const network = await sdk.getNetwork()
@@ -80,7 +81,9 @@ export default function SellForm() {
 
       const data = {
         ...form,
-        network
+        network,
+        // Convert units
+        sellAmount: parseInt(form.sellAmount, 10) * (10 ** parseInt(form.precision, 10)),
       }
 
       const res = await fetch('/api/sells', {
@@ -119,27 +122,27 @@ export default function SellForm() {
           <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="name">Asset ID</FieldLabel>
+                <FieldLabel htmlFor="assetId">Asset ID</FieldLabel>
                 <Input name="assetId" autoComplete="off" required onChange={loadDetail} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="name">Asset Name</FieldLabel>
+                <FieldLabel htmlFor="assetName">Asset Name</FieldLabel>
                 <Input value={form.assetName} name="assetName" autoComplete="off" onChange={handleChange} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="name">Asset Precision</FieldLabel>
+                <FieldLabel htmlFor="precision">Asset Precision</FieldLabel>
                 <Input value={form.precision} name="precision" autoComplete="off" onChange={handleChange} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="name">Sell Price (sats)</FieldLabel>
+                <FieldLabel htmlFor="sellPrice">Sell Price (sats)</FieldLabel>
                 <Input value={form.sellPrice} name="sellPrice" autoComplete="off" onChange={handleChange} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="name">Sell Amount</FieldLabel>
+                <FieldLabel htmlFor="sellAmount">Sell Amount</FieldLabel>
                 <Input value={form.sellAmount} name="sellAmount" autoComplete="off" onChange={handleChange} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="name">Seller Address</FieldLabel>
+                <FieldLabel htmlFor="sellerAddress">Seller Address</FieldLabel>
                 <Input disabled value={form.sellerAddress} name="sellerAddress" autoComplete="off"  />
               </Field>
 

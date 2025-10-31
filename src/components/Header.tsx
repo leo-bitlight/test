@@ -26,7 +26,7 @@ export default function Header() {
   };
 
   return (
-    <header className='sticky top-0 bg-background shadow h-12 flex items-center justify-between px-4'>
+    <header className='sticky z-10 top-0 bg-background shadow h-12 flex items-center justify-between px-4'>
       <div className='flex gap-x-4'>
         <a href='/'>Home</a>
         <a href='/sells'>Sell</a>
