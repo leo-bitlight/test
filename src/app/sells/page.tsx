@@ -82,7 +82,7 @@ export default function SellForm() {
       const data = {
         ...form,
         network,
-        // Convert units
+        // Convert units and save to database
         sellAmount: parseInt(form.sellAmount, 10) * (10 ** parseInt(form.precision, 10)),
       }
 

@@ -24,6 +24,7 @@ model Sell {
 
 model Order {
 	id             Int      @id @default(autoincrement())
+	sellId         Int
 	network 			 String   @default("")
 	assetId        String
 	assetName      String
@@ -39,7 +40,6 @@ model Order {
 	buyer_address  String
 	sell_address   String
 	status         String
-	txid		   String?
+	txid		       String?
 	createdAt      DateTime @default(now())
-	sellId         Int
 }
