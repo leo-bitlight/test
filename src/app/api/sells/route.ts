@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
+import Decimal from 'decimal.js';
 
 export async function POST(req: NextRequest) {
   const data = await req.json();
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
       assetId,
       assetName,
       precision: parseInt(precision, 10),
-      sellPrice: parseFloat(sellPrice),
+      sellPrice: new Decimal(sellPrice).toNumber(),
       sellAmount: parseInt(sellAmount, 10),
       sellerAddress,
       status: "0"

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import Decimal from 'decimal.js'
 
 export default function SellForm() {
   const { address } = useContext(AccountContext)!;
@@ -83,7 +84,8 @@ export default function SellForm() {
         ...form,
         network,
         // Convert units and save to database
-        sellAmount: parseFloat(form.sellAmount) * (10 ** parseInt(form.precision, 10)),
+        sellAmount: new Decimal(form.sellAmount)
+          .mul(Decimal.pow(10, parseInt(form.precision, 10))).toNumber(),
       }
 
       // Amount must be an integer
