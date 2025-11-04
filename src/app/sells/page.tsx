@@ -83,7 +83,14 @@ export default function SellForm() {
         ...form,
         network,
         // Convert units and save to database
-        sellAmount: parseInt(form.sellAmount, 10) * (10 ** parseInt(form.precision, 10)),
+        sellAmount: parseFloat(form.sellAmount) * (10 ** parseInt(form.precision, 10)),
+      }
+
+      // Amount must be an integer
+      if(data.sellAmount % 1 !== 0) {
+        toast.error('Sell amount is invalid, check the precision');
+        setLoading(false);
+        return
       }
 
       const res = await fetch('/api/sells', {
