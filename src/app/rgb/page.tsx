@@ -8,7 +8,7 @@ import AccountContext from "@/context/AccountContext";
 import { useContext, useEffect, useRef, useState } from "react";
 import SDK from '../../sdk/index'
 
-export default function Btc() {
+export default function RGB() {
   const [loading, setLoading] = useState(false);
   const { address } = useContext(AccountContext)!;
   const sdkRef = useRef<SDK | null>(null)
@@ -24,16 +24,13 @@ export default function Btc() {
 
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
-    const to = formData.get('to') as string;
-    const amount = formData.get('amount') as string;
-    const sats = Number(amount) * 10 ** 8
+    const invoice = formData.get('invoice') as string;
 
     try {
-      const result = await sdkRef.current!.sendBitcoin({
-        toAddress: to,
-        satoshis: sats
+      const result = await sdkRef.current!.sendRGB({
+        invoice
       })
-      console.log(result.txid)
+      console.log(result)
     } catch(e) {
       console.error(e)
     }
@@ -43,18 +40,14 @@ export default function Btc() {
     <div className="max-w-xl p-4 mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Send Btc</CardTitle>
+          <CardTitle>Send RGB Asset</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="to">To</FieldLabel>
-                <Input name="to" autoComplete="off" required />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="amount">Amount (btc)</FieldLabel>
-                <Input name="amount" autoComplete="off" />
+                <FieldLabel htmlFor="to">Invoice</FieldLabel>
+                <Input name="invoice" autoComplete="off" required />
               </Field>
               
 
