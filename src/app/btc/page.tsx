@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import AccountContext from "@/context/AccountContext";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import SDK from '../../sdk/index'
 
 export default function Btc() {
@@ -13,9 +13,11 @@ export default function Btc() {
   const { address } = useContext(AccountContext)!;
   const sdkRef = useRef<SDK | null>(null)
 
-  if(sdkRef.current === null) {
-    sdkRef.current = new SDK()
-  }
+  useEffect(() => {
+    if(sdkRef.current === null) {
+      sdkRef.current = new SDK()
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
