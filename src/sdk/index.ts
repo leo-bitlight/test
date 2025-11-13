@@ -1,6 +1,8 @@
+import validate from 'bitcoin-address-validation';
+
 declare global {
   interface Window {
-    bitlight?: BitlightInjected;
+    // bitlight?: BitlightInjected;
   }
 }
 
@@ -145,7 +147,7 @@ class BitlightWalletSDK {
     }
 
     if (window.bitlight) {
-      this.wallet = window.bitlight;
+      this.wallet = window.bitlight as any;
     } else {
       this.injectedCheck = this.waitForInjection();
     }
@@ -156,7 +158,7 @@ class BitlightWalletSDK {
       const start = Date.now();
       const interval = setInterval(() => {
         if (window.bitlight) {
-          this.wallet = window.bitlight;
+          this.wallet = window.bitlight as any;
           clearInterval(interval);
           resolve();
         } else if (Date.now() - start > timeout) {
@@ -297,13 +299,32 @@ class BitlightWalletSDK {
   }
 
   async sendBitcoin(post: SendBitcoinPost): Promise<SendBitcoinResult> {
+    const { toAddress, satoshis } = post;
+    if (!this.isBitcoinAddress(toAddress)) {
+      throw new Error('Invalid Bitcoin address format.');
+    }
+    if (satoshis <= 1000) {
+      throw new Error('Satoshis must be greater than 1000.');
+    }
     await this.waitForWalletReady();
     return await this.wallet!.sendBitcoin(post);
   }
 
   async sendRGB(post: SendRGBPost): Promise<SendRGBResult> {
+    const { invoice } = post;
+    if (!this.isRGBInvoice(invoice)) {
+      throw new Error('Invalid RGB invoice format.');
+    }
     await this.waitForWalletReady();
     return await this.wallet!.sendRGB(post);
+  }
+
+
+  isBitcoinAddress(address: string): boolean {
+    return validate(address);
+  }
+  isRGBInvoice(invoice: string): boolean {
+    return /contract:[\s\S]*/.test(invoice);
   }
 
 }

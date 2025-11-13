@@ -7,11 +7,12 @@ import { Input } from "@/components/ui/input";
 import AccountContext from "@/context/AccountContext";
 import { useContext, useEffect, useRef, useState } from "react";
 import SDK from '../../sdk/index'
+import { toast } from "sonner";
 
 export default function RGB() {
   const [loading, setLoading] = useState(false);
   const { address } = useContext(AccountContext)!;
-  const sdkRef = useRef<SDK | null>(null)
+  const sdkRef = useRef<any>(null)
 
   useEffect(() => {
     if(sdkRef.current === null) {
@@ -32,7 +33,7 @@ export default function RGB() {
       })
       console.log(result)
     } catch(e) {
-      console.error(e)
+      toast.error((e as Error).message)
     }
   }
 
