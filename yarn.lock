@@ -7,10 +7,12 @@
   resolved "https://registry.yarnpkg.com/@alloc/quick-lru/-/quick-lru-5.2.0.tgz#7bf68b20c0a350f936915fcae06f58e32007ce30"
   integrity sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==
 
-"@bitlight/wallet-sdk@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@bitlight/wallet-sdk/-/wallet-sdk-0.1.3.tgz#58c13020042276f6d480d32b1bb2c6f058772eea"
-  integrity sha512-LGraGtbw81CsdpCkIR3pagUGPMY0kuYTFUunwuvcZC5XqMm9N5qWGxP+ojIj/sV4d/bCIzuW6QZVKo2PvJYZ0w==
+"@bitlight/wallet-sdk@0.1.5":
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/@bitlight/wallet-sdk/-/wallet-sdk-0.1.5.tgz#560e489c47d9ecb438a3bd5e773084aae13f93e1"
+  integrity sha512-es8CrPAau2e6sNiANXvo8p/MZ/W6DBif4b1BLfv2MgWyUgGPMLSnnUPP0BS/yg5784PQ0LgIjzdJFFXjeLhjYg==
+  dependencies:
+    bitcoin-address-validation "^3.0.0"
 
 "@emnapi/core@^1.5.0":
   version "1.6.0"
