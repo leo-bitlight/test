@@ -6,13 +6,13 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import AccountContext from "@/context/AccountContext";
 import { useContext, useEffect, useRef, useState } from "react";
-import SDK from '../../sdk/index'
+import SDK from '@bitlight/wallet-sdk'
 import { toast } from "sonner";
 
 export default function RGB() {
   const [loading, setLoading] = useState(false);
   const { address } = useContext(AccountContext)!;
-  const sdkRef = useRef<any>(null)
+  const sdkRef = useRef<SDK | null>(null)
 
   useEffect(() => {
     if(sdkRef.current === null) {
